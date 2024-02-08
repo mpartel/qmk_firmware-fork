@@ -18,15 +18,6 @@
 
 #include QMK_KEYBOARD_H
 
-typedef union {
-    uint32_t raw;
-    struct {
-        bool fnlock_enabled : 1;
-    };
-} user_config_t;
-
-user_config_t user_config;
-
 enum _ext_keycode {
     FK_RFKL = SAFE_RANGE, // RF Kill (Airplane Mode)
     FK_BRND,              // Brightness Down
@@ -90,13 +81,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 // clang-format on
 
-layer_state_t layer_state_set_user(layer_state_t state) {
-    bool fnlock_enabled        = !layer_state_cmp(state, _FN_ANY);
-    user_config.fnlock_enabled = fnlock_enabled;
-    eeconfig_update_user(user_config.raw);
-    return state;
-}
-
 bool process_record_user(uint16_t keycode, keyrecord_t* record) {
     switch (keycode) {
         case FK_FN: { // FN
@@ -118,8 +102,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t* record) {
 }
 
 void keyboard_post_init_user(void) {
-    user_config.raw = eeconfig_read_user();
-    if (user_config.fnlock_enabled) {
-        layer_on(_FN_ANY);
-    }
+    // Uncomment this to enable Fn mode by default
+    // layer_on(_FN_ANY);
 }
