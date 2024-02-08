@@ -1,4 +1,3 @@
-# This file intentionally left blank
 
-BACKLIGHT_ENABLE = yes
+BACKLIGHT_ENABLE = no
 BACKLIGHT_DRIVER = software
