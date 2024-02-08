@@ -19,29 +19,31 @@
 #include QMK_KEYBOARD_H
 
 typedef union {
-  uint32_t raw;
-  struct {
-    bool     fnlock_enabled :1;
-  };
+    uint32_t raw;
+    struct {
+        bool fnlock_enabled : 1;
+    };
 } user_config_t;
 
 user_config_t user_config;
 
 enum _ext_keycode {
-	FK_RFKL = SAFE_RANGE, // RF Kill (Airplane Mode)
-	FK_BRND, // Brightness Down
-	FK_BRNU, // Brightness Up
-	FK_BKLT, // Keyboard Backlight
-	FK_FN,
+    FK_RFKL = SAFE_RANGE, // RF Kill (Airplane Mode)
+    FK_BRND,              // Brightness Down
+    FK_BRNU,              // Brightness Up
+    FK_BKLT,              // Keyboard Backlight
+    FK_FN,
 };
 
 enum _layers {
-	_BASE,
-	_FN_ANY,
-	_FN_PRESSED,
+    _BASE,
+    _FN_ANY,
+    _FN_PRESSED,
 };
 
 #define FK_FLCK TG(_FN_ANY)
+
+// clang-format off
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     /*
@@ -86,36 +88,38 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     ),
 };
 
+// clang-format on
+
 layer_state_t layer_state_set_user(layer_state_t state) {
-	bool fnlock_enabled = !layer_state_cmp(state, _FN_ANY);
+    bool fnlock_enabled        = !layer_state_cmp(state, _FN_ANY);
     user_config.fnlock_enabled = fnlock_enabled;
     eeconfig_update_user(user_config.raw);
-	return state;
+    return state;
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t* record) {
-        switch (keycode) {
-                case FK_FN: { // FN
-			// The FN key toggles the top row (F1-F12)
-			// which we keep in its own layer.
-			// We use XOR here to turn it off while held if function lock
-			// has turned it on
-			layer_invert(_FN_ANY);
-			if (record->event.pressed) {
-				layer_on(_FN_PRESSED);
-	    		} else {
-				layer_off(_FN_PRESSED);
+    switch (keycode) {
+        case FK_FN: { // FN
+            // The FN key toggles the top row (F1-F12)
+            // which we keep in its own layer.
+            // We use XOR here to turn it off while held if function lock
+            // has turned it on
+            layer_invert(_FN_ANY);
+            if (record->event.pressed) {
+                layer_on(_FN_PRESSED);
+            } else {
+                layer_off(_FN_PRESSED);
             }
 
-			return false;
-    		}
+            return false;
         }
-	return true;
+    }
+    return true;
 }
 
 void keyboard_post_init_user(void) {
     user_config.raw = eeconfig_read_user();
     if (user_config.fnlock_enabled) {
-			layer_on(_FN_ANY);
-	}
+        layer_on(_FN_ANY);
+    }
 }
