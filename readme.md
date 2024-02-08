@@ -1,3 +1,13 @@
+# Notes to self for this modified version
+
+- Install qmk CLI tool: `python3 -m pip install --user qmk`
+- Set up IDE support: `qmk generate-compilation-database -kb framework_rp2040_controller -km default`
+- Build: `qmk compile -kb framework_rp2040_controller -km default`
+- Flash: `qmk flash -kb framework_rp2040_controller -km default`
+    - Press Fn+Right Shift, or plug in again holding C, then mount the drive that pops up.
+
+Original readme follows:
+
 # Quantum Mechanical Keyboard Firmware
 
 [![Current Version](https://img.shields.io/github/tag/qmk/qmk_firmware.svg)](https://github.com/qmk/qmk_firmware/tags)
