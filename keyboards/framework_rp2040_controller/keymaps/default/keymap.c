@@ -18,6 +18,10 @@
 
 #include QMK_KEYBOARD_H
 
+#include "led.h"
+#include "gpio.h"
+#include "wait.h"
+
 enum _ext_keycode {
     FK_RFKL = SAFE_RANGE, // RF Kill (Airplane Mode)
     FK_BRND,              // Brightness Down
@@ -33,6 +37,10 @@ enum _layers {
 };
 
 #define FK_FLCK TG(_FN_ANY)
+
+#define GPIO_DATA GP24
+#define GPIO_CLOCK GP25
+#define GPIO_LATCH GP28
 
 // clang-format off
 
@@ -104,4 +112,53 @@ bool process_record_user(uint16_t keycode, keyrecord_t* record) {
 void keyboard_post_init_user(void) {
     // Uncomment this to enable Fn mode by default
     // layer_on(_FN_ANY);
+
+    setPinOutput(GPIO_DATA);
+    setPinOutput(GPIO_CLOCK);
+    setPinOutput(GPIO_LATCH);
+}
+
+bool led_update_user(led_t led_state) {
+    // LED status is set into an 8-bit memory slot on another chip,
+    // 1 bit at a time.
+    // https://github.com/CRImier/framework_input_controller/blob/master/test_code/main.py
+    // https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
+
+    ATOMIC_BLOCK_FORCEON {
+        writePin(GPIO_DATA, 0);
+        writePin(GPIO_CLOCK, 0);
+        writePin(GPIO_LATCH, 0);
+        // Some of these waits may be unnecessary, but 10s of us isn't much of a waste.
+        const int w = 1;
+        wait_us(w);
+        int data = 0xff;
+        if (led_state.caps_lock) {
+            data &= 0xef;
+        }
+        /*
+        if (led_red) {
+            data &= 0xdf;
+        }
+        if (led_white) {
+            data &= 0xbf;
+        }
+        if (led_green) {
+            data &= 0x7f;
+        }
+        */
+        for (int i = 0; i < 8; ++i) {
+            int v = data & (1 << i);
+            writePin(GPIO_DATA, v);
+            wait_us(w);
+            writePin(GPIO_CLOCK, 1);
+            wait_us(w);
+            writePin(GPIO_CLOCK, 0);
+            wait_us(w);
+        }
+        wait_us(w);
+        writePin(GPIO_LATCH, 1);
+        wait_us(w);
+    }
+
+    return false;
 }
