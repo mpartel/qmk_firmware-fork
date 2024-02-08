@@ -5,6 +5,12 @@
 - Build: `qmk compile -kb framework_rp2040_controller -km default`
 - Flash: `qmk flash -kb framework_rp2040_controller -km default`
     - Press Fn+Right Shift, or plug in again holding C, then mount the drive that pops up.
+- Debugging:
+    - https://bbs.archlinux.org/viewtopic.php?id=278341 except use this line: `KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0660", GROUP="input", TAG+="uaccess", TAG+="udev-acl"`  (not sure yet what the tags do)
+    - in `info.json`, set `"console": true`
+    - in `keymap.c`, in `keyboard_post_init_user`, do `debug_enable=true;`
+    - `#include "print.h"` and print with either `print` or `uprintf`
+    - `qmk console` before flashing
 
 Original readme follows:
 
