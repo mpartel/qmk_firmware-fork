@@ -12,6 +12,20 @@
     - `#include "print.h"` and print with either `print` or `uprintf`
     - `qmk console` before flashing
 
+Resources:
+- Arya's controller schematics, esp. `framework_input_brkt` is useful: https://github.com/CRImier/MyKiCad/tree/master/Laptop%20mods/framework_input_controller
+- Framework's input cover info: https://github.com/FrameworkComputer/Framework-Laptop-13/tree/main/Mainboard#input-cover-interface
+- Framework's EC source code: https://github.com/FrameworkComputer/EmbeddedController
+    - https://github.com/FrameworkComputer/EmbeddedController/blob/hx20-hx30/common/i2c_hid_touchpad.c
+    - https://github.com/FrameworkComputer/EmbeddedController/tree/hx20-hx30/baseboard/fwk
+    - But these seem incomplete.
+    - A comment says "touchpad driver is not in gerrit yet, so comment out this for now"
+    - But `baseboard/fwk/ps2mouse.c` seems to have something
+
+Touchpad notes:
+- `TP_SDA`, `TP_CTL` - I2C pins
+- `TP_INT` - set high to disable touchpad
+
 Original readme follows:
 
 # Quantum Mechanical Keyboard Firmware

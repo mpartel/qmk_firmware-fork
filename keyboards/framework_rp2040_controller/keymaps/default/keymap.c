@@ -21,6 +21,10 @@
 #include "led.h"
 #include "gpio.h"
 #include "wait.h"
+#include "i2c_master.h"
+#include "report.h"
+#include "util.h"
+#include "print.h"
 
 enum _ext_keycode {
     FK_RFKL = SAFE_RANGE, // RF Kill (Airplane Mode)
@@ -162,3 +166,77 @@ bool led_update_user(led_t led_state) {
 
     return false;
 }
+
+// All addresses seem to respond?
+#define TOUCHPAD_I2C_ADDR (0x2c << 1)
+#define TOUCHPAD_COMMAND_REGISTER 0x22
+
+void pointing_device_driver_init(void) {
+    debug_enable = true;
+
+    wait_ms(5000);  // Wait for debug console to connect
+
+    print("Starting I2C\n");
+    i2c_init();
+    // TODO: set HZ where?
+
+    for (int i = 8; i <= 0x77; ++i) {
+        uprintf("SCAN %d\n", i);
+        i2c_status_t status = i2c_start(i << 1);
+        const uint16_t cmd[4] = {0x0336, 0x0023, 0x0004, 0x0006};
+        status = i2c_writeReg16(
+            i,
+            TOUCHPAD_COMMAND_REGISTER,
+            (void*)cmd,
+            ARRAY_SIZE(cmd) * sizeof(uint16_t),
+            25
+        );
+        if (status != I2C_STATUS_TIMEOUT) {
+            uprintf("SCAN %d SEND STATUS: %d\n", i, (int)status);
+        }
+        uint8_t buf[2];
+        memset(buf, 0, 2);
+        status = i2c_receive(i << 1, buf, 2, 25);
+        if (status != I2C_STATUS_ERROR) {
+            uprintf("SCAN %d RECV STATUS: %d\n", i, (int)status);
+        }
+        i2c_stop();
+        wait_ms(10);
+    }
+
+    /*
+	const uint16_t cmd[4] = {0x0336, 0x0023, 0x0004, 0x0006};
+    i2c_status_t status = i2c_start(TOUCHPAD_I2C_ADDR);
+    uprintf("START STATUS: %d\n", (int)status);
+    wait_ms(1);
+    status = i2c_writeReg16(
+        TOUCHPAD_I2C_ADDR,
+        TOUCHPAD_COMMAND_REGISTER,
+        (void*)cmd,
+        ARRAY_SIZE(cmd) * sizeof(uint16_t),
+        25
+    );
+    uprintf("SEND STATUS: %d\n", (int)status);
+    i2c_stop();
+    wait_ms(1);
+
+    const uint16_t buf_len = 128;
+    uint8_t buf[buf_len];
+    memset(buf, 0, buf_len);
+
+    i2c_start(TOUCHPAD_I2C_ADDR);
+    status = i2c_receive(TOUCHPAD_I2C_ADDR, buf, buf_len, 25);
+    uprintf("RECV STATUS: %d, 1st byte: %d\n", (int)status, (int)buf[0]);
+    i2c_stop();
+    */
+}
+
+report_mouse_t pointing_device_driver_get_report(report_mouse_t mouse_report) {
+    return mouse_report;
+}
+
+uint16_t pointing_device_driver_get_cpi(void) {
+    return 0;
+}
+
+void pointing_device_driver_set_cpi(uint16_t cpi) {}
