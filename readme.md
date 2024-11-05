@@ -5,7 +5,7 @@
 - Build: `qmk compile -kb framework_rp2040_controller -km default`
 - Flash: `qmk flash -kb framework_rp2040_controller -km default` and then do one of these:
     1. (Needed for fresh board) Connect GD and BT while plugging the board in, then mount the drive.
-    2. (Works for subsequent flashes) Press Fn + Right Shift, or hold C and plug in the keyboard again, then mount the drive.
+    2. (Works for subsequent flashes) Hold C and plug in the keyboard again, then mount the drive.
 - Debugging:
     - https://bbs.archlinux.org/viewtopic.php?id=278341 except use this line: `KERNEL=="hidraw*", SUBSYSTEM=="hidraw", MODE="0660", GROUP="input", TAG+="uaccess", TAG+="udev-acl"`  (not sure yet what the tags do)
     - in `info.json`, set `"console": true`
